@@ -23,9 +23,12 @@ impl Importer {
     }
 
     pub fn backup(&self) -> io::Result<()> {
-        let mut backup_path = self.destpath.clone(); //.parent().unwrap().to_path_buf(); // self.destpath.clone()
+        let mut backup_path = self.destpath.clone();
+
+        let home_folder = self.destpath.file_name().unwrap().to_str().unwrap();
+
         backup_path.push(
-            format!("{}-backup", self.destpath.file_name().unwrap().to_str().unwrap())
+            format!("{}-backup", home_folder)
         );
 
         let mut file_extension = 1;
@@ -37,7 +40,7 @@ impl Importer {
                 Some(err) => {
                     if err.kind() == io::ErrorKind::AlreadyExists {
                         backup_path.set_file_name(
-                format!("config-backup{}", file_extension)
+                format!("{}-backup{}", home_folder, file_extension)
                         );
                         file_extension += 1;
                     } else {
