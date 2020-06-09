@@ -1,6 +1,7 @@
 use std::path;
 use std::io;
 use std::fs;
+use std::ffi;
 
 pub fn link(src_dir: &path::PathBuf, dest_dir: &path::PathBuf) -> io::Result<()> {
   link_recurse(src_dir, dest_dir, src_dir)
@@ -10,6 +11,10 @@ fn link_recurse(src_dir: &path::PathBuf, dest_dir: &path::PathBuf, cur_dir: &pat
   for entry in cur_dir.read_dir().unwrap() {
     if let Ok(entry) = entry {
         let found_path = entry.path();
+
+        if found_path.file_name() == Some(ffi::OsStr::new(".git")) || found_path.file_name() == Some(ffi::OsStr::new("dotfiles_importer")) {
+            break
+        }
 
         let dest_path = dest_dir.join(
           found_path.strip_prefix(src_dir).unwrap()

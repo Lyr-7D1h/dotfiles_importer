@@ -1,6 +1,7 @@
 use std::path;
 use std::io;
 use std::fs;
+use std::ffi;
 
 ///
 /// If file from src_dir exists in dest_dir copy the file from dest_dir to bak_dir
@@ -24,6 +25,10 @@ fn backup_existing_current_dir
     for entry in cur_dir.read_dir().unwrap() {
         if let Ok(entry) = entry {
             let found_path = entry.path();
+
+            if found_path.file_name() == Some(ffi::OsStr::new(".git")) || found_path.file_name() == Some(ffi::OsStr::new("dotfiles_importer")) {
+                break
+            }
 
             let relative_file_path = found_path.strip_prefix(src_dir).unwrap(); 
 
