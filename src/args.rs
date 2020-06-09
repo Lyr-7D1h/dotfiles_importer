@@ -7,7 +7,16 @@ pub struct ImporterArgs {
   pub backup: bool,
 }
 
-// TODO: Improve argument parsing
+fn get_path_buf(path: &str) -> Result<path::PathBuf, String> {
+  let path = path::PathBuf::from(path);
+  if ! path.is_dir() {
+    return Err("Path is not a directory".to_string());
+  }
+
+  Ok(path)
+}
+
+
 impl ImporterArgs {
   fn default() -> ImporterArgs {
     let dot_files_path  = match env::current_dir() {
@@ -29,21 +38,24 @@ impl ImporterArgs {
     }
   }
 
-  pub fn new() -> Result<ImporterArgs, &'static str> {
-    let mut args: Vec<String> = env::args().collect();
-
+  pub fn new(args: Vec<String>) -> Result<ImporterArgs, String> {
     let mut importer_args = ImporterArgs::default();
 
-    args.remove(0);
+    let mut args = args.iter();
 
-    for (i, arg) in args.iter().enumerate() {
-      match arg.as_str() {
-        "-h" | "--help" => {
-          let help = r#"dotfiles_importer
+    args.next();
+
+    loop {
+      let arg = args.next();
+      match arg {
+        Some(arg) => {
+          match arg.as_str() {
+            "-h" | "--help" => {
+              let help = r#"dotfiles_importer
 Lyr-7d1h <Lyr-7d1h@pm.me>
 
 Usage:
-  importer [OPTIONS]
+  dotfiles_importer [OPTIONS]
 
 Backup existing dotfiles and then hardlink them from source directory to destination directory
 
@@ -52,28 +64,45 @@ OPTIONS:
   -d <path>, --destination <path>   path to destination directory [default: $HOME]
   -n, --no-backup                   don't make a backup of the existing dotfiles
   -t, --test                        use the test directory (test-config)
-          "#;
-          return Err(help);
-        },
-        "-s" | "--source" => {
-          let source_path = args.get(i + 1);
-          
-          match source_path {
-            Some(path) => importer_args.srcpath = path::PathBuf::from(path),
-            None => return Err("No argument given for -s")
+              "#;
+              return Err(help.to_string());
+            },
+            "-d" | "--destination" => {
+              let path_option = args.next();
+              
+              match path_option {
+                Some(path) => {
+                  importer_args.srcpath = get_path_buf(path)?
+                },
+                None => return Err(
+                  "No argument given for --destination".to_string()
+                )
+              }
+            },
+            "-s" | "--source" => {
+              let path_option = args.next();
+              
+              match path_option {
+                Some(path) => {
+                  importer_args.srcpath = get_path_buf(path)?;
+                },
+                None => return Err(
+                  "No argument given for --source".to_string()
+                )
+              }
+            },
+            "-n" | "--no-backup" => importer_args.backup = false,
+            "-t" | "--test" => {
+              println!("Using test paths..");
+              importer_args.srcpath = path::PathBuf::from("test-config/new_config");
+              importer_args.destpath = path::PathBuf::from("test-config/config");
+            },
+            _ => {
+              return Err(format!("Invalid option: {}", arg));
+            }
           }
         },
-        "-n" | "--no-backup" => importer_args.backup = false,
-        "-t" | "--test" => {
-          println!("Using test paths..");
-          importer_args.srcpath = path::PathBuf::from("test-config/new_config");
-          importer_args.destpath = path::PathBuf::from("test-config/config");
-        },
-        _ => {
-          let error = &format!("Invalid option: {}", arg);
-
-          return Err(error.as_str());
-        }
+        None => break
       }
     }
 

@@ -1,14 +1,16 @@
-use importer::Importer;
-use importer::args;
+use dotfiles_importer::Importer;
+use dotfiles_importer::args;
 
 use std::io;
 use std::process;
+use std::env;
 
 ///
 /// Make sure src_dir does not contain "dest_dir.filename()-backup" as file or directory
 ///
 fn main() {
-    let options = args::ImporterArgs::new().unwrap_or_else(|err| {
+    let args = env::args().collect();
+    let options = args::ImporterArgs::new(args).unwrap_or_else(|err| {
         eprintln!("{}", err);
         process::exit(1)
     });

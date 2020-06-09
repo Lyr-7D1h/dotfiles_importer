@@ -19,20 +19,7 @@ impl Importer {
             srcpath: args.srcpath.clone()
         };
 
-        importer.validate()?;
-
         Ok(importer)
-    }
-
-    fn validate(&self) -> Result<(), &str> {
-        if ! &self.destpath.is_dir() {
-            return Err("Destination path in not a directory")
-        }
-        if ! &self.srcpath.is_dir() {
-            return Err("Source path in not a directory")
-        }
-
-        Ok(())
     }
 
     pub fn backup(&self) -> io::Result<()> {
