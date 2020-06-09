@@ -11,7 +11,7 @@ You can find the executable in `target/release`.
 Once you have the executable you should drop it in your dotfiles repo.
 By default it will use the current folder as source and your home directory as destination.
 
-From `-h` argument;
+From `-h` argument:
 ```
 Usage:
   dotfiles_importer [OPTIONS]
