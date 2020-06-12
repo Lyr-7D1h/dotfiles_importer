@@ -22,5 +22,4 @@ OPTIONS:
   -s <path>, --source <path>        path to source directory [default: wd/cwd]
   -d <path>, --destination <path>   path to destination directory [default: $HOME]
   -n, --no-backup                   don't make a backup of the existing dotfiles
-  -t, --test                        use the test directory (test-config)
   ```

@@ -1,45 +1,40 @@
-use std::path;
-use std::io;
-use std::fs;
 use std::ffi;
+use std::fs;
+use std::io;
+use std::path;
 
 ///
 /// If file from src_dir exists in dest_dir copy the file from dest_dir to bak_dir
 ///
-pub fn backup_existing_files
-(
-    src_dir: &path::PathBuf, 
-    dest_dir: &path::PathBuf, 
-    bak_dir: &path::PathBuf) 
--> io::Result<()> {
+pub fn backup_existing_files(
+    src_dir: &path::PathBuf,
+    dest_dir: &path::PathBuf,
+    bak_dir: &path::PathBuf,
+) -> io::Result<()> {
     backup_existing_current_dir(src_dir, dest_dir, bak_dir, src_dir.clone())
 }
 
-fn backup_existing_current_dir
-(
-    src_dir: &path::PathBuf, 
-    dest_dir: &path::PathBuf, 
-    bak_dir: &path::PathBuf, 
-    cur_dir: path::PathBuf
+fn backup_existing_current_dir(
+    src_dir: &path::PathBuf,
+    dest_dir: &path::PathBuf,
+    bak_dir: &path::PathBuf,
+    cur_dir: path::PathBuf,
 ) -> io::Result<()> {
     for entry in cur_dir.read_dir().unwrap() {
         if let Ok(entry) = entry {
             let found_path = entry.path();
 
-            if found_path.file_name() == Some(ffi::OsStr::new(".git")) || found_path.file_name() == Some(ffi::OsStr::new("dotfiles_importer")) {
-                break
+            if found_path.file_name() == Some(ffi::OsStr::new(".git"))
+                || found_path.file_name() == Some(ffi::OsStr::new("dotfiles_importer"))
+            {
+                println!("Ignoring {:?}", found_path);
+                continue;
             }
 
-            let relative_file_path = found_path.strip_prefix(src_dir).unwrap(); 
+            let relative_file_path = found_path.strip_prefix(src_dir).unwrap();
 
-            let dest_path = dest_dir.join(
-                relative_file_path
-            );
-            let bak_path = bak_dir.join(
-                relative_file_path
-            );
-            
-            // TODO: Ignore .git and importer 
+            let dest_path = dest_dir.join(relative_file_path);
+            let bak_path = bak_dir.join(relative_file_path);
 
             if found_path.is_file() {
                 if dest_path.exists() && dest_path.is_file() {
@@ -47,12 +42,10 @@ fn backup_existing_current_dir
                     match fs::copy(dest_path, bak_path) {
                         Ok(_) => (),
                         Err(err) => {
-                            return Err(
-                                io::Error::new(
-                                    err.kind(),
-                                    "could not copy file to backup location"
-                                )
-                            )
+                            return Err(io::Error::new(
+                                err.kind(),
+                                "could not copy file to backup location",
+                            ))
                         }
                     }
                 }
