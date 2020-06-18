@@ -13,13 +13,11 @@ pub struct Importer {
 }
 
 impl Importer {
-    pub fn new(args: &args::ImporterArgs) -> Result<Importer, String> {
-        let importer = Importer {
+    pub fn from(args: &args::ImporterArgs) -> Importer {
+        Importer {
             destpath: args.destpath.clone(),
             srcpath: args.srcpath.clone()
-        };
-
-        Ok(importer)
+        }
     }
 
     pub fn backup(&self) -> io::Result<()> {

@@ -17,11 +17,8 @@ fn main() {
 
     println!("\nSource: {:?}\nDestination: {:?}", options.srcpath, options.destpath);
     
-    let importer = Importer::new(&options).unwrap_or_else(|err| {
-        eprintln!("Invalid options: {}", err);
-        process::exit(1)
-    });
-    
+    let importer = Importer::from(&options);
+        
     if options.backup {
         println!("\nBacking up...");
         match importer.backup() {
